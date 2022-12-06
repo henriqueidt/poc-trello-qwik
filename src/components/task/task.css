@@ -1,0 +1,15 @@
+.task {
+  background-color: white;
+  padding: 2rem 1rem;
+  margin-bottom: 0.75rem;
+  cursor: grab;
+}
+
+.task:active {
+  cursor: grabbing;
+}
+
+.task--skeleton {
+  background-color: var(--color-light-gray-20);
+  color: var(--color-light-gray-20);
+}
