@@ -49,6 +49,7 @@ export const BoardManager = component$(() => {
 
   const currentColumnOver = useSignal<ColumnProps>({});
   const currentColumnIndexOver = useSignal<number | null>(null);
+  const currentTaskOverIndex = useSignal<number | null>(null);
 
   const onCreateNewTask$ = $((index: number) => {
     const currentColumn = data.columns[index];
@@ -80,7 +81,9 @@ export const BoardManager = component$(() => {
     }
   );
 
-  const onDragOverColumn$ = $((index: number) => {
+  const onDragOverColumn$ = $((index: number, taskIndex: number) => {
+    console.log("dravovercolumn", taskIndex);
+    currentTaskOverIndex.value = taskIndex;
     if (currentColumnIndexOver.value === index) {
       return;
     }
@@ -104,11 +107,19 @@ export const BoardManager = component$(() => {
 
   const onDropTask$ = $((task, taskIndex: number, columnIndex: number) => {
     const originColumn = data.columns[columnIndex];
-    currentColumnOver.value.tasks.push({ ...task, isSkeleton: false });
+    currentColumnOver.value.tasks.splice(currentTaskOverIndex.value, 0, {
+      ...task,
+      isSkeleton: false,
+    });
     currentColumnOver.value.hasSkeleton = false;
 
     data.columns[columnIndex].hasSkeleton = false;
-    originColumn.tasks.splice(taskIndex, 1);
+
+    const indexToRemove = originColumn.tasks.findIndex(
+      (originColumnTask) => originColumnTask.isSkeleton
+    );
+
+    originColumn.tasks.splice(indexToRemove, 1);
   });
 
   return (

@@ -1,4 +1,9 @@
-import { component$, useStylesScoped$, PropFunction } from "@builder.io/qwik";
+import {
+  component$,
+  useStylesScoped$,
+  PropFunction,
+  $,
+} from "@builder.io/qwik";
 import { Column, ColumnProps } from "../column/column";
 import { Task, TaskProps } from "../task/task";
 import styles from "./board.css?inline";
@@ -27,6 +32,12 @@ export const Board = component$<BoardProps>(
   }) => {
     useStylesScoped$(styles);
 
+    const onDragOver$ = $((index: number) => {
+      if (data.columns[index].tasks.length === 0) {
+        onDragOverColumn$(index, 0);
+      }
+    });
+
     return (
       <div class="board">
         {data.columns.map(
@@ -36,27 +47,29 @@ export const Board = component$<BoardProps>(
               name={name}
               onCreateNewTask$={() => onCreateNewTask$(index)}
               onConfirmTask$={() => onConfirmTask$(index)}
-              onDragOverColumn$={() => onDragOverColumn$(index)}
+              onDragOverColumn$={() => onDragOver$(index)}
               isEditing={isEditing}
               hasSkeleton={hasSkeleton}
             >
               {tasks?.map(({ id, name, isEditing, isSkeleton }, taskIndex) => {
                 return (
-                  <Task
-                    key={id}
-                    name={name}
-                    isEditing={isEditing}
-                    isSkeleton={isSkeleton}
-                    onChangeTask$={(e) => onChangeTask$(e, taskIndex, index)}
-                    onDragStart$={() => onDragTask$(id, index)}
-                    onDrop$={() =>
-                      onDropTask$(
-                        { id, name, isEditing, isSkeleton },
-                        taskIndex,
-                        index
-                      )
-                    }
-                  />
+                  <div onDragEnter$={() => onDragOverColumn$(index, taskIndex)}>
+                    <Task
+                      key={id}
+                      name={name}
+                      isEditing={isEditing}
+                      isSkeleton={isSkeleton}
+                      onChangeTask$={(e) => onChangeTask$(e, taskIndex, index)}
+                      onDragStart$={() => onDragTask$(id, index)}
+                      onDrop$={() =>
+                        onDropTask$(
+                          { id, name, isEditing, isSkeleton },
+                          taskIndex,
+                          index
+                        )
+                      }
+                    />
+                  </div>
                 );
               })}
             </Column>
